@@ -322,7 +322,6 @@
 				class="w-full h-full object-cover"
 				loop
 				autoplay
-				muted
 				oncanplay={handleVideoCanPlay}
 				onended={() => (currentTranscriptIndex = 0)}
 			>
@@ -331,13 +330,13 @@
 
 			{#if currentTranscript[currentTranscriptIndex]}
 				<div
-					class="absolute bottom-16 left-1/2 transform -translate-x-1/2 max-w-4xl px-6"
+					class="absolute bottom-16 left-1/2 transform -translate-x-1/2 max-w-7xl px-6"
 					style="background-color: rgba(0, 0, 0, {backgroundTransparency /
 						100}); border-radius: 8px;"
 				>
 					{#key currentTranscriptIndex}
 						<p
-							out:blur
+							in:blur
 							class="text-white font-medium text-center py-4 px-6"
 							style="font-size: {textSize}pt; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);"
 						>
