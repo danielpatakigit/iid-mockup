@@ -107,6 +107,7 @@
 			},
 		],
 	}
+	const textColors = { white: 'White', black: 'Black', red: 'Red', blue: 'Blue' }
 
 	const languages = { en: 'English', de: 'Deutsch', hu: 'Magyar' }
 	const lectureHalls = [
@@ -124,12 +125,15 @@
 	}
 
 	// State management
+	let isTranscriptChecked = $state(false)
+	let isSummaryChecked = $state(false)
 	let currentView = $state('login')
 	let username = $state(''),
 		password = $state(''),
 		emailAddress = $state('')
 	let selectedLectureHall = $state(''),
-		selectedLanguage = $state('en')
+		selectedLanguage = $state('en'),
+		selectedTextColor = $state('white')
 	let textSize = $state(11),
 		backgroundTransparency = $state(70)
 	let currentTranscriptIndex = $state(0),
@@ -338,7 +342,7 @@
 						<p
 							in:blur
 							class="text-white font-medium text-center py-4 px-6"
-							style="font-size: {textSize}pt; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);"
+							style="font-size: {textSize}pt; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8); color: {selectedTextColor}"
 						>
 							{currentTranscript[currentTranscriptIndex].text}
 						</p>
@@ -437,6 +441,17 @@
 						</select>
 					</div>
 					<div>
+						<label class="block text-white text-sm font-medium mb-2">Text Color</label>
+						<select
+							bind:value={selectedTextColor}
+							class="w-full px-3 py-2 bg-white/20 border border-white/30 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+						>
+							{#each Object.entries(textColors) as [code, name]}
+								<option value={code} class="bg-gray-800">{name}</option>
+							{/each}
+						</select>
+					</div>
+					<div>
 						<label class="block text-white text-sm font-medium mb-2">Text Size: {textSize}pt</label>
 						<input
 							type="range"
@@ -466,7 +481,7 @@
 						>
 							<p
 								class="text-white text-center"
-								style="font-size: {textSize}pt; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);"
+								style="font-size: {textSize}pt; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8); color: {selectedTextColor}"
 							>
 								Sample subtitle text
 							</p>
@@ -507,9 +522,11 @@
 						/>
 					</div>
 					<div>
+						<div style="display: flex; align-content: center; justify-content: space-between; ">
 						<label class="block text-white text-sm font-medium mb-2"
-							>Full Transcript ({languages[selectedLanguage]})</label
-						>
+							>Full Transcript ({languages[selectedLanguage]})</label>
+						<input type="checkbox" bind:checked={isTranscriptChecked} class="form-checkbox text-blue-500" />
+						</div>
 						<div class="bg-white/10 border border-white/30 rounded-md p-4 max-h-48 overflow-y-auto">
 							<div class="space-y-2">
 								{#each currentTranscript as segment}
@@ -526,9 +543,12 @@
 						</div>
 					</div>
 					<div>
-						<label class="block text-white text-sm font-medium mb-2"
+						<div style="display: flex; align-content: center; justify-content: space-between; ">
+							<label class="block text-white text-sm font-medium mb-2"
 							>AI Generated Summary ({languages[selectedLanguage]})</label
-						>
+							>
+							<input type="checkbox" bind:checked={isSummaryChecked} class="form-checkbox text-blue-500" />
+						</div>
 						<div class="bg-white/10 border border-white/30 rounded-md p-4 max-h-32 overflow-y-auto">
 							<p class="text-white text-sm leading-relaxed">{currentSummary}</p>
 						</div>
@@ -543,7 +563,8 @@
 					</button>
 					<button
 						onclick={handleExport}
-						class="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-green-400"
+						disabled={(emailAddress === '') || (!isSummaryChecked && !isTranscriptChecked)}
+						class="exportButton flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-green-400"
 					>
 						Send to Email
 					</button>
@@ -554,10 +575,13 @@
 </div>
 
 <style>
+
+	.exportButton:disabled{
+		background-color: gray;
+	}
 	/* Custom styles for range inputs to make them more visible */
 	input[type='range'] {
 		-webkit-appearance: none;
-		background: transparent;
 	}
 
 	input[type='range']::-webkit-slider-track {
