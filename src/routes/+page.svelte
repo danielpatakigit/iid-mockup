@@ -124,6 +124,42 @@
 		hu: "David Malan professzor bemutatja a CS50-et, a Harvard informatika kurzusát. Megosztja személyes útját a kormányzati tanulmányoktól az informatikáig, hangsúlyozva, hogy a programozás általános célú problémamegoldó készség, amely sok területen alkalmazható. Figyelmezteti a hallgatókat, hogy a kurzus úgy fog érezni, mint 'tűzoltótömlőből inni' a nagy mennyiségű információ miatt, de bátorítja őket, hogy még ez az egyetlen informatikai kurzus is értékes lehet, függetlenül a szakjuktól.",
 	}
 
+
+	let subtitlePosX = $state(50); // percent
+	let subtitlePosY = $state(84); // percent (initial bottom position)
+
+	let isDraggingSubtitle = false;
+	let dragOffsetX = 0;
+	let dragOffsetY = 0;
+
+	function startDrag(event) {
+		isDraggingSubtitle = true;
+		dragOffsetX = event.clientX;
+		dragOffsetY = event.clientY;
+	}
+
+	function handleMouseMove(event) {
+		if (isDraggingSubtitle) {
+			const dx = event.clientX - dragOffsetX;
+			const dy = event.clientY - dragOffsetY;
+
+			subtitlePosX += (dx / window.innerWidth) * 100;
+			subtitlePosY += (dy / window.innerHeight) * 100;
+
+			dragOffsetX = event.clientX;
+			dragOffsetY = event.clientY;
+
+			// Clamp values to stay within viewport
+			subtitlePosX = Math.min(100, Math.max(0, subtitlePosX));
+			subtitlePosY = Math.min(100, Math.max(0, subtitlePosY));
+		}
+	}
+
+	function stopDrag() {
+		isDraggingSubtitle = false;
+	}
+
+
 	// State management
 	let isTranscriptChecked = $state(false)
 	let isSummaryChecked = $state(false)
@@ -147,16 +183,24 @@
 	const currentSummary = $derived(summaryData[selectedLanguage] || summaryData.en)
 
 	onMount(() => {
-		const handleMouseMove = (e) => {
-			mouseX = e.clientX
-			mouseY = e.clientY
-		}
-		document.addEventListener('mousemove', handleMouseMove)
+		const handleMouseMoveGlobal = (e) => {
+			mouseX = e.clientX;
+			mouseY = e.clientY;
+			handleMouseMove(e);
+		};
+
+		const handleMouseUp = () => stopDrag();
+
+		document.addEventListener('mousemove', handleMouseMoveGlobal);
+		document.addEventListener('mouseup', handleMouseUp);
+
 		return () => {
-			document.removeEventListener('mousemove', handleMouseMove)
-			if (transcriptInterval) clearInterval(transcriptInterval)
-		}
-	})
+			document.removeEventListener('mousemove', handleMouseMoveGlobal);
+			document.removeEventListener('mouseup', handleMouseUp);
+			if (transcriptInterval) clearInterval(transcriptInterval);
+		};
+	});
+
 
 	function handleLogin() {
 		if (username.trim() && password.trim()) {
@@ -330,19 +374,30 @@
 				onended={() => (currentTranscriptIndex = 0)}
 			>
 				<source src="/src/lib/video.mp4" type="video/mp4" />
+				<track kind="captions" src="" srclang="en" label="English" />
 			</video>
 
 			{#if currentTranscript[currentTranscriptIndex]}
 				<div
-					class="absolute bottom-16 left-1/2 transform -translate-x-1/2 max-w-7xl px-6"
-					style="background-color: rgba(0, 0, 0, {backgroundTransparency /
-						100}); border-radius: 8px;"
+						role="button"
+						aria-label="Draggable subtitle"
+						tabindex="0"
+						onmousedown={startDrag}
+						class="absolute"
+						style="
+			left: {subtitlePosX}%;
+			top: {subtitlePosY}%;
+			transform: translate(-50%, -50%);
+			cursor: move;
+			background-color: rgba(0, 0, 0, {backgroundTransparency / 100});
+			border-radius: 8px;
+		"
 				>
 					{#key currentTranscriptIndex}
 						<p
-							in:blur
-							class="text-white font-medium text-center py-4 px-6"
-							style="font-size: {textSize}pt; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8); color: {selectedTextColor}"
+								in:blur
+								class="text-white font-medium text-center py-4 px-6"
+								style="font-size: {textSize}pt; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8); color: {selectedTextColor}"
 						>
 							{currentTranscript[currentTranscriptIndex].text}
 						</p>
