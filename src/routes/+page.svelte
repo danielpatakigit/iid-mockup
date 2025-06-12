@@ -124,41 +124,39 @@
 		hu: "David Malan professzor bemutatja a CS50-et, a Harvard informatika kurzusát. Megosztja személyes útját a kormányzati tanulmányoktól az informatikáig, hangsúlyozva, hogy a programozás általános célú problémamegoldó készség, amely sok területen alkalmazható. Figyelmezteti a hallgatókat, hogy a kurzus úgy fog érezni, mint 'tűzoltótömlőből inni' a nagy mennyiségű információ miatt, de bátorítja őket, hogy még ez az egyetlen informatikai kurzus is értékes lehet, függetlenül a szakjuktól.",
 	}
 
+	let subtitlePosX = $state(50) // percent
+	let subtitlePosY = $state(84) // percent (initial bottom position)
 
-	let subtitlePosX = $state(50); // percent
-	let subtitlePosY = $state(84); // percent (initial bottom position)
-
-	let isDraggingSubtitle = false;
-	let dragOffsetX = 0;
-	let dragOffsetY = 0;
+	let isDraggingSubtitle = false
+	let dragOffsetX = 0
+	let dragOffsetY = 0
 
 	function startDrag(event) {
-		isDraggingSubtitle = true;
-		dragOffsetX = event.clientX;
-		dragOffsetY = event.clientY;
+		isDraggingSubtitle = true
+		dragOffsetX = event.clientX
+		dragOffsetY = event.clientY
 	}
 
 	function handleMouseMove(event) {
 		if (isDraggingSubtitle) {
-			const dx = event.clientX - dragOffsetX;
-			const dy = event.clientY - dragOffsetY;
+			const dx = event.clientX - dragOffsetX
+			const dy = event.clientY - dragOffsetY
 
-			subtitlePosX += (dx / window.innerWidth) * 100;
-			subtitlePosY += (dy / window.innerHeight) * 100;
+			subtitlePosX += (dx / window.innerWidth) * 100
+			subtitlePosY += (dy / window.innerHeight) * 100
 
-			dragOffsetX = event.clientX;
-			dragOffsetY = event.clientY;
+			dragOffsetX = event.clientX
+			dragOffsetY = event.clientY
 
 			// Clamp values to stay within viewport
-			subtitlePosX = Math.min(100, Math.max(0, subtitlePosX));
-			subtitlePosY = Math.min(100, Math.max(0, subtitlePosY));
+			subtitlePosX = Math.min(100, Math.max(0, subtitlePosX))
+			subtitlePosY = Math.min(100, Math.max(0, subtitlePosY))
 		}
 	}
 
 	function stopDrag() {
-		isDraggingSubtitle = false;
+		isDraggingSubtitle = false
 	}
-
 
 	// State management
 	let isTranscriptChecked = $state(false)
@@ -184,23 +182,22 @@
 
 	onMount(() => {
 		const handleMouseMoveGlobal = (e) => {
-			mouseX = e.clientX;
-			mouseY = e.clientY;
-			handleMouseMove(e);
-		};
+			mouseX = e.clientX
+			mouseY = e.clientY
+			handleMouseMove(e)
+		}
 
-		const handleMouseUp = () => stopDrag();
+		const handleMouseUp = () => stopDrag()
 
-		document.addEventListener('mousemove', handleMouseMoveGlobal);
-		document.addEventListener('mouseup', handleMouseUp);
+		document.addEventListener('mousemove', handleMouseMoveGlobal)
+		document.addEventListener('mouseup', handleMouseUp)
 
 		return () => {
-			document.removeEventListener('mousemove', handleMouseMoveGlobal);
-			document.removeEventListener('mouseup', handleMouseUp);
-			if (transcriptInterval) clearInterval(transcriptInterval);
-		};
-	});
-
+			document.removeEventListener('mousemove', handleMouseMoveGlobal)
+			document.removeEventListener('mouseup', handleMouseUp)
+			if (transcriptInterval) clearInterval(transcriptInterval)
+		}
+	})
 
 	function handleLogin() {
 		if (username.trim() && password.trim()) {
@@ -373,18 +370,18 @@
 				oncanplay={handleVideoCanPlay}
 				onended={() => (currentTranscriptIndex = 0)}
 			>
-				<source src="/src/lib/video.mp4" type="video/mp4" />
+				<source src="/video.mp4" type="video/mp4" />
 				<track kind="captions" src="" srclang="en" label="English" />
 			</video>
 
 			{#if currentTranscript[currentTranscriptIndex]}
 				<div
-						role="button"
-						aria-label="Draggable subtitle"
-						tabindex="0"
-						onmousedown={startDrag}
-						class="absolute"
-						style="
+					role="button"
+					aria-label="Draggable subtitle"
+					tabindex="0"
+					onmousedown={startDrag}
+					class="absolute"
+					style="
 			left: {subtitlePosX}%;
 			top: {subtitlePosY}%;
 			transform: translate(-50%, -50%);
@@ -395,9 +392,9 @@
 				>
 					{#key currentTranscriptIndex}
 						<p
-								in:blur
-								class="text-white font-medium text-center py-4 px-6"
-								style="font-size: {textSize}pt; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8); color: {selectedTextColor}"
+							in:blur
+							class="text-white font-medium text-center py-4 px-6"
+							style="font-size: {textSize}pt; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8); color: {selectedTextColor}"
 						>
 							{currentTranscript[currentTranscriptIndex].text}
 						</p>
@@ -578,9 +575,14 @@
 					</div>
 					<div>
 						<div style="display: flex; align-content: center; justify-content: space-between; ">
-						<label class="block text-white text-sm font-medium mb-2"
-							>Full Transcript ({languages[selectedLanguage]})</label>
-						<input type="checkbox" bind:checked={isTranscriptChecked} class="form-checkbox text-blue-500" />
+							<label class="block text-white text-sm font-medium mb-2"
+								>Full Transcript ({languages[selectedLanguage]})</label
+							>
+							<input
+								type="checkbox"
+								bind:checked={isTranscriptChecked}
+								class="form-checkbox text-blue-500"
+							/>
 						</div>
 						<div class="bg-white/10 border border-white/30 rounded-md p-4 max-h-48 overflow-y-auto">
 							<div class="space-y-2">
@@ -600,9 +602,13 @@
 					<div>
 						<div style="display: flex; align-content: center; justify-content: space-between; ">
 							<label class="block text-white text-sm font-medium mb-2"
-							>AI Generated Summary ({languages[selectedLanguage]})</label
+								>AI Generated Summary ({languages[selectedLanguage]})</label
 							>
-							<input type="checkbox" bind:checked={isSummaryChecked} class="form-checkbox text-blue-500" />
+							<input
+								type="checkbox"
+								bind:checked={isSummaryChecked}
+								class="form-checkbox text-blue-500"
+							/>
 						</div>
 						<div class="bg-white/10 border border-white/30 rounded-md p-4 max-h-32 overflow-y-auto">
 							<p class="text-white text-sm leading-relaxed">{currentSummary}</p>
@@ -618,7 +624,7 @@
 					</button>
 					<button
 						onclick={handleExport}
-						disabled={(emailAddress === '') || (!isSummaryChecked && !isTranscriptChecked)}
+						disabled={emailAddress === '' || (!isSummaryChecked && !isTranscriptChecked)}
 						class="exportButton flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-green-400"
 					>
 						Send to Email
@@ -630,8 +636,7 @@
 </div>
 
 <style>
-
-	.exportButton:disabled{
+	.exportButton:disabled {
 		background-color: gray;
 	}
 	/* Custom styles for range inputs to make them more visible */
